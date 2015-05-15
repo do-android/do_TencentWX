@@ -7,3 +7,4 @@ proguard/
 *.classpath
 /doExt_do_TencentWX/libs/docore.jar
 /doExt_do_TencentWX/do_build.xml
+/doExt_do_TencentWX/do_TencentWX.zip
