@@ -10,17 +10,19 @@ import android.view.View;
 import com.doext.module.activity.R;
 
 import core.DoServiceContainer;
-import core.object.DoModule;
+import core.object.DoSingletonModule;
+import doext.app.do_TencentWX_App;
 import doext.implement.do_TencentWX_Model;
 import dotest.module.frame.debug.DoPageViewFactory;
 import dotest.module.frame.debug.DoService;
+import dotest.module.frame.debug.DoSingletonModuleFactory;
 
 /**
  * 测试扩展组件Activity需继承此类，并重写相应测试方法；
  */
 public class DoTestActivity extends Activity {
 	
-	protected DoModule model;
+	protected DoSingletonModule model;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,9 @@ public class DoTestActivity extends Activity {
 	 */
 	protected void initModuleModel() throws Exception {
 		model = new do_TencentWX_Model();
+		DoSingletonModuleFactory factory = new DoSingletonModuleFactory();
+		DoServiceContainer.setSingletonModuleFactory(factory);
+		factory.dictSingletonModules.put(do_TencentWX_App.getInstance().getModuleTypeID(), model);
 	}
 
 	/**

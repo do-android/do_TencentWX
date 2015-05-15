@@ -1,11 +1,10 @@
 package doext.implement;
 
+import com.tencent.mm.sdk.modelmsg.SendAuth.Resp;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
-
-import com.doext.module.activity.wxapi.WXEntryActivity;
-
 import core.DoServiceContainer;
 import core.helper.jsonparse.DoJsonNode;
 import core.interfaces.DoIScriptEngine;
@@ -73,19 +72,32 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 */
 	@Override
 	public void login(DoJsonNode _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
+		this.scriptEngine = _scriptEngine;
+		this.callbackFuncName = _callbackFuncName;
 		String _appId = _dictParas.getOneText("appId", "");
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
-		Intent i = new Intent(_activity, WXEntryActivity.class);
 		String _packageName = _activity.getPackageName();
 		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
+		Intent i = new Intent();
 		i.putExtra("appId", _appId);
 		i.putExtra("isFlag", false);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
 
-	public void callBack(String code) {
-		System.out.println("code = " + code);
+	private DoIScriptEngine scriptEngine;
+	private String callbackFuncName;
+
+	public void callBack(Resp resp) throws Exception {
+		DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
+		DoJsonNode _node = new DoJsonNode();
+		_node.setOneInteger("errCode", resp.errCode);
+		_node.setOneText("code", resp.code);
+		_node.setOneText("state", resp.state);
+		_node.setOneText("lang", resp.lang);
+		_node.setOneText("country", resp.country);
+		_invokeResult.setResultNode(_node);
+		scriptEngine.callback(callbackFuncName, _invokeResult);
 	}
 
 }

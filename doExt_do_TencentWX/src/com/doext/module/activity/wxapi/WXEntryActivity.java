@@ -11,7 +11,6 @@ import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import core.DoServiceContainer;
-import core.helper.DoScriptEngineHelper;
 import doext.app.do_TencentWX_App;
 import doext.implement.do_TencentWX_Model;
 
@@ -42,8 +41,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	public void onResp(BaseResp r) {
 		SendAuth.Resp resp = (SendAuth.Resp) r;
 		try {
-			do_TencentWX_Model _model = (do_TencentWX_Model) DoScriptEngineHelper.parseSingletonModule(null, do_TencentWX_App.getInstance().getModuleTypeID());
-			_model.callBack(resp.code);
+			do_TencentWX_Model _model = (do_TencentWX_Model) DoServiceContainer.getSingletonModuleFactory().getSingletonModuleByID(null, do_TencentWX_App.getInstance().getModuleTypeID());
+			_model.callBack(resp);
 		} catch (Exception e) {
 			DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model onResp \n\t", e);
 		}
