@@ -1,12 +1,15 @@
 package doext.implement;
 
-import com.tencent.mm.sdk.modelmsg.SendAuth.Resp;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+
+import com.tencent.mm.sdk.modelmsg.SendAuth.Resp;
+
 import core.DoServiceContainer;
-import core.helper.jsonparse.DoJsonNode;
+import core.helper.DoJsonHelper;
 import core.interfaces.DoIScriptEngine;
 import core.object.DoInvokeResult;
 import core.object.DoSingletonModule;
@@ -34,7 +37,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 * @_invokeResult 用于返回方法结果对象
 	 */
 	@Override
-	public boolean invokeSyncMethod(String _methodName, DoJsonNode _dictParas, DoIScriptEngine _scriptEngine, DoInvokeResult _invokeResult) throws Exception {
+	public boolean invokeSyncMethod(String _methodName, JSONObject _dictParas, DoIScriptEngine _scriptEngine, DoInvokeResult _invokeResult) throws Exception {
 		// ...do something
 		return super.invokeSyncMethod(_methodName, _dictParas, _scriptEngine, _invokeResult);
 	}
@@ -53,7 +56,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 *                    DoInvokeResult(this.getUniqueKey());
 	 */
 	@Override
-	public boolean invokeAsyncMethod(String _methodName, DoJsonNode _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
+	public boolean invokeAsyncMethod(String _methodName, JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		if ("login".equals(_methodName)) {
 			this.login(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
@@ -71,10 +74,10 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 * @_callbackFuncName 回调函数名
 	 */
 	@Override
-	public void login(DoJsonNode _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
+	public void login(JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		this.scriptEngine = _scriptEngine;
 		this.callbackFuncName = _callbackFuncName;
-		String _appId = _dictParas.getOneText("appId", "");
+		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
 		String _packageName = _activity.getPackageName();
 		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
@@ -90,12 +93,12 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 
 	public void callBack(Resp resp) throws Exception {
 		DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
-		DoJsonNode _node = new DoJsonNode();
-		_node.setOneInteger("errCode", resp.errCode);
-		_node.setOneText("code", resp.code);
-		_node.setOneText("state", resp.state);
-		_node.setOneText("lang", resp.lang);
-		_node.setOneText("country", resp.country);
+		JSONObject _node = new JSONObject();
+		_node.put("errCode", resp.errCode);
+		_node.put("code", resp.code);
+		_node.put("state", resp.state);
+		_node.put("lang", resp.lang);
+		_node.put("country", resp.country);
 		_invokeResult.setResultNode(_node);
 		scriptEngine.callback(callbackFuncName, _invokeResult);
 	}
