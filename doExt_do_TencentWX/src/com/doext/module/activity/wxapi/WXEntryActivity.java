@@ -2,6 +2,7 @@ package com.doext.module.activity.wxapi;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.tencent.mm.sdk.modelbase.BaseReq;
 import com.tencent.mm.sdk.modelbase.BaseResp;
@@ -15,13 +16,18 @@ import doext.app.do_TencentWX_App;
 import doext.implement.do_TencentWX_Model;
 
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
-	public static String WEIXIN_APP_ID = "wx7589880f174273b5";
 	private IWXAPI api;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		api = WXAPIFactory.createWXAPI(this, WEIXIN_APP_ID);
+		String appId = getIntent().getStringExtra("appId");
+		if(appId == null){
+			finish();
+			Toast.makeText(this, "appId不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		api = WXAPIFactory.createWXAPI(this, appId);
 		api.handleIntent(getIntent(), this);
 		boolean isFlag = getIntent().getBooleanExtra("isFlag", true);
 		if (!isFlag) {
