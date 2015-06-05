@@ -8,4 +8,5 @@ import core.interfaces.DoIScriptEngine;
  */
 public interface do_TencentWX_IMethod {
 	void login(JSONObject _dictParas,DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception ;
+	void pay(JSONObject _dictParas,DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception ;
 }
