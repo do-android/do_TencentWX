@@ -35,7 +35,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		if (do_TencentWX_Model.LOING_FLAG.equals(operatFlag)) {
 			login();
 		} else if (do_TencentWX_Model.PAY_FLAG.equals(operatFlag)) {
-			pay();
+			pay(appId);
 		}
 
 	}
@@ -51,24 +51,18 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		}
 	}
 
-	private void pay() {
+	private void pay(String appId) {
 		PayReq req = new PayReq();
-		
-		String _appId = getIntent().getStringExtra("appId");
+
 		String _partnerId = getIntent().getStringExtra("partnerId");
 		String _package = getIntent().getStringExtra("package");
 		String _nonceStr = getIntent().getStringExtra("nonceStr");
 		String _timeStamp = getIntent().getStringExtra("timeStamp");
 		String _sign = getIntent().getStringExtra("sign");
-		if (checkIsNull("appId", _appId)
-				&& !checkIsNull("partnerId", _partnerId)
-				&& !checkIsNull("package", _package)
-				&& !checkIsNull("nonceStr", _nonceStr)
-				&& !checkIsNull("timeStamp", _timeStamp)
-				&& !checkIsNull("sign", _sign)) {
+		if (!checkIsNull("partnerId", _partnerId) && !checkIsNull("package", _package) && !checkIsNull("nonceStr", _nonceStr) && !checkIsNull("timeStamp", _timeStamp) && !checkIsNull("sign", _sign)) {
 			return;
 		} else {
-			req.appId = _appId;
+			req.appId = appId;
 			req.partnerId = _partnerId;
 			req.packageValue = _package;
 			req.nonceStr = _nonceStr;
@@ -86,28 +80,26 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	public void onResp(BaseResp r) {
 		SendAuth.Resp resp = (SendAuth.Resp) r;
 		try {
-			do_TencentWX_Model _model = (do_TencentWX_Model) DoServiceContainer
-					.getSingletonModuleFactory().getSingletonModuleByID(null,
-							do_TencentWX_App.getInstance().getModuleTypeID());
-			_model.callBack(resp,do_TencentWX_Model.LOING_FLAG);
+			do_TencentWX_Model _model = (do_TencentWX_Model) DoServiceContainer.getSingletonModuleFactory().getSingletonModuleByID(null, do_TencentWX_App.getInstance().getModuleTypeID());
+			_model.callBack(resp, do_TencentWX_Model.LOING_FLAG);
 			if (resp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
-				_model.callBack(resp,do_TencentWX_Model.PAY_FLAG);
+				_model.callBack(resp, do_TencentWX_Model.PAY_FLAG);
 			}
 		} catch (Exception e) {
-			DoServiceContainer.getLogEngine().writeError(
-					"do_TencentWX_Model onResp \n\t", e);
+			DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model onResp \n\t", e);
 		}
 		this.finish();
-		
+
 	}
-	private boolean checkIsNull(String name,String data){
-		if(data==null){
+
+	private boolean checkIsNull(String name, String data) {
+		if (data == null) {
 			finish();
-			Toast.makeText(this, name+"不能为空", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, name + "不能为空", Toast.LENGTH_SHORT).show();
 			return true;
-		}else{
+		} else {
 			return false;
 		}
-		
+
 	}
 }
