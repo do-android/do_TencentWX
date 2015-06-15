@@ -6,6 +6,8 @@ import java.util.Map;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.doext.module.activity.R;
 
@@ -23,7 +25,7 @@ import dotest.module.frame.debug.DoSingletonModuleFactory;
 public class DoTestActivity extends Activity {
 	
 	protected DoSingletonModule model;
-	
+	private EditText edit_scene;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -38,6 +40,7 @@ public class DoTestActivity extends Activity {
 			e.printStackTrace();
 		}
 		onEvent();
+		edit_scene = (EditText) findViewById(R.id.edit_scene);
 	}
 
 	/**
@@ -82,17 +85,77 @@ public class DoTestActivity extends Activity {
 	protected void doTestSyncMethod() {
 
 	}
-
+	
+	/**
+	 * 测试分享图文
+	 */
+	public void shareImgText(View view) {
+		Map<String, String>  _paras_loadString = new HashMap<String, String>();
+        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("scene", edit_scene.getText().toString());
+        _paras_loadString.put("type", "0");
+        _paras_loadString.put("title", "测试微信分享");
+        _paras_loadString.put("content", "测试微信分享测试微信分享测试微信分享测试微信分享");
+        _paras_loadString.put("url", "http://www.baidu.com");
+       // _paras_loadString.put("image", "/storage/emulated/0/test.png");
+        _paras_loadString.put("image", "http://img.qzone.la/uploads/allimg/110629/co110629135Z1-6.jpg");
+        DoService.ansyncMethod(this.model, "share", _paras_loadString, new DoService.EventCallBack() {
+			@Override
+			public void eventCallBack(String _data) {//回调函数
+				Toast.makeText(DoTestActivity.this, "异步方法回调：" + _data, Toast.LENGTH_SHORT).show();
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+			}
+		});
+	}
+	/**
+	 * 测试分享纯图
+	 */
+	public void shareImg(View view) {
+		Map<String, String>  _paras_loadString = new HashMap<String, String>();
+        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("scene", edit_scene.getText().toString());
+        _paras_loadString.put("type", "1");
+        _paras_loadString.put("url", "http://www.baidu.com");
+        _paras_loadString.put("image", "/storage/emulated/0/test.png");
+        DoService.ansyncMethod(this.model, "share", _paras_loadString, new DoService.EventCallBack() {
+			@Override
+			public void eventCallBack(String _data) {//回调函数
+				Toast.makeText(DoTestActivity.this, "异步方法回调：" + _data, Toast.LENGTH_SHORT).show();
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+			}
+		});
+	}
+	/**
+	 * 测试分享音乐
+	 */
+	public void shareMusic(View view) {
+		Map<String, String>  _paras_loadString = new HashMap<String, String>();
+        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("scene", edit_scene.getText().toString());
+        _paras_loadString.put("type", "2");
+        _paras_loadString.put("title", "音乐标题");
+        _paras_loadString.put("content", "这是首为你写的歌这是首为你写的歌这是首为你写的歌");
+        _paras_loadString.put("audio", "http://staff2.ustc.edu.cn/~wdw/softdown/index.asp/0042515_05.ANDY.mp3");
+        DoService.ansyncMethod(this.model, "share", _paras_loadString, new DoService.EventCallBack() {
+			@Override
+			public void eventCallBack(String _data) {//回调函数
+				Toast.makeText(DoTestActivity.this, "异步方法回调：" + _data, Toast.LENGTH_SHORT).show();
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+			}
+		});
+	}
+	
 	/**
 	 * 测试异步方法
 	 */
 	protected void doTestAsyncMethod() {
 		Map<String, String>  _paras_loadString = new HashMap<String, String>();
-        _paras_loadString.put("appId", "wx7589880f174273b5");
+        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        
         DoService.ansyncMethod(this.model, "login", _paras_loadString, new DoService.EventCallBack() {
 			@Override
 			public void eventCallBack(String _data) {//回调函数
-//				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
 			}
 		});
 		
