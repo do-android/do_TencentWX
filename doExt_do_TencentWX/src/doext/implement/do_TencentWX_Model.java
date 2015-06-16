@@ -6,9 +6,13 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 
-import com.tencent.mm.sdk.modelmsg.SendAuth.Resp;
+import com.doext.module.activity.wxapi.WXEntryActivity;
+import com.tencent.mm.sdk.modelbase.BaseResp;
+import com.tencent.mm.sdk.modelmsg.SendAuth;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
 
 import core.DoServiceContainer;
+import core.helper.DoIOHelper;
 import core.helper.DoJsonHelper;
 import core.interfaces.DoIScriptEngine;
 import core.object.DoInvokeResult;
@@ -24,8 +28,9 @@ import doext.define.do_TencentWX_IMethod;
  */
 public class do_TencentWX_Model extends DoSingletonModule implements do_TencentWX_IMethod {
 	
-	public static final String LOING_FLAG = "login";
+	public static final String LOGIN_FLAG = "login";
 	public static final String PAY_FLAG = "pay";
+	public static final String SHARE_FLAG = "share";
 	public do_TencentWX_Model() throws Exception {
 		super();
 	}
@@ -67,6 +72,10 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 			this.pay(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
+		if ("share".equals(_methodName)) {
+			this.share(_dictParas, _scriptEngine, _callbackFuncName);
+			return true;
+		}
 		return super.invokeAsyncMethod(_methodName, _dictParas, _scriptEngine, _callbackFuncName);
 	}
 
@@ -90,7 +99,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		Intent i = new Intent();
 		i.putExtra("appId", _appId);
 		i.putExtra("isFlag", false);
-		i.putExtra("operatFlag", LOING_FLAG);
+		i.putExtra("operatFlag", LOGIN_FLAG);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
@@ -98,9 +107,11 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	private DoIScriptEngine scriptEngine;
 	private String callbackFuncName;
 
-	public void callBack(Resp resp,String type) throws Exception {
-		if(type.equals(LOING_FLAG)){
-			DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
+	public void callBack(BaseResp baseResp) throws Exception {
+		
+		DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
+		if (baseResp instanceof SendAuth.Resp) {
+			SendAuth.Resp resp = (SendAuth.Resp) baseResp;
 			JSONObject _node = new JSONObject();
 			_node.put("errCode", resp.errCode);
 			_node.put("code", resp.code);
@@ -108,13 +119,18 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 			_node.put("lang", resp.lang);
 			_node.put("country", resp.country);
 			_invokeResult.setResultNode(_node);
-			scriptEngine.callback(callbackFuncName, _invokeResult);
-		}else if(type.equals(PAY_FLAG)){
-			DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
-			_invokeResult.setResultInteger(Integer.valueOf(resp.errCode));
-			scriptEngine.callback(callbackFuncName, _invokeResult);
+			
+		}else if(baseResp instanceof SendMessageToWX.Resp){
+			SendMessageToWX.Resp resp = (SendMessageToWX.Resp) baseResp;
+			//分享成功
+			if(resp.errCode == BaseResp.ErrCode.ERR_OK){
+				_invokeResult.setResultBoolean(true);
+			//分享失败
+			}else{
+				_invokeResult.setResultBoolean(false);
+			}
 		}
-		
+		scriptEngine.callback(callbackFuncName, _invokeResult);
 	}
 
 	/**
@@ -151,5 +167,50 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
+	
+	/**
+	 * 使用微信分享；
+	 * 
+	 * @throws Exception
+	 * 
+	 * @_dictParas 参数（K,V），可以通过此对象提供相关方法来获取参数值（Key：为参数名称）；
+	 * @_scriptEngine 当前Page JS上下文环境对象
+	 * @_callbackFuncName 回调函数名
+	 */
+	@Override
+	public void share(JSONObject _dictParas, DoIScriptEngine _scriptEngine,
+			String _callbackFuncName) throws Exception {
 
+		this.scriptEngine = _scriptEngine;
+		this.callbackFuncName = _callbackFuncName;
+		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
+		int _scene = DoJsonHelper.getInt(_dictParas, "scene", 0);
+		int _type = DoJsonHelper.getInt(_dictParas,"type", 0);
+		String _title = DoJsonHelper.getString(_dictParas,"title", "");
+		String _content = DoJsonHelper.getString(_dictParas,"content", "");
+		String _url = DoJsonHelper.getString(_dictParas,"url", "");
+		String _image = DoJsonHelper.getString(_dictParas,"image", "");
+		String _audio = DoJsonHelper.getString(_dictParas,"audio", "");
+		
+		if (!_image.equals("")&&null == DoIOHelper.getHttpUrlPath(_image)) {
+			_image = DoIOHelper.getLocalFileFullPath(_scriptEngine.getCurrentApp(), _image);
+		}
+		
+		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
+		String _packageName = _activity.getPackageName();
+		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
+		Intent i = new Intent();
+		i.putExtra("appId", _appId);
+		i.putExtra("scene", _scene);
+		i.putExtra("type", _type);
+		i.putExtra("title", _title);
+		i.putExtra("content", _content);
+		i.putExtra("url", _url);
+		i.putExtra("image", _image);
+		i.putExtra("audio", _audio);
+		i.putExtra("operatFlag", SHARE_FLAG);
+		i.setComponent(_componetName);
+		_activity.startActivity(i);
+	}
+	
 }

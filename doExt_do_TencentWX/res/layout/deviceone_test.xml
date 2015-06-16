@@ -29,6 +29,32 @@
         android:layout_below="@+id/header"
         android:background="@drawable/red"
         android:orientation="vertical" >
+        <EditText 
+            android:id="@+id/edit_scene"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ems="3"
+            android:text="0" />
+        <Button
+            android:id="@+id/share_text_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="shareImgText"
+            android:text="图文分享" />
+        <Button
+            android:id="@+id/share_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="shareImg"
+            android:text="纯图分享" />
+        <Button
+            android:id="@+id/share_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="shareMusic"
+            android:text="音乐分享" />
+
     </LinearLayout>
 
     <LinearLayout
