@@ -31,6 +31,10 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	public static final String LOGIN_FLAG = "login";
 	public static final String PAY_FLAG = "pay";
 	public static final String SHARE_FLAG = "share";
+	
+	public static String OPERAT_FLAG  = LOGIN_FLAG;
+	
+	
 	public do_TencentWX_Model() throws Exception {
 		super();
 	}
@@ -65,14 +69,17 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	@Override
 	public boolean invokeAsyncMethod(String _methodName, JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		if ("login".equals(_methodName)) {
+			OPERAT_FLAG  =  LOGIN_FLAG;
 			this.login(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
 		if ("pay".equals(_methodName)) {
+			OPERAT_FLAG  =  PAY_FLAG;
 			this.pay(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
 		if ("share".equals(_methodName)) {
+			OPERAT_FLAG  =  SHARE_FLAG;
 			this.share(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
@@ -99,7 +106,6 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		Intent i = new Intent();
 		i.putExtra("appId", _appId);
 		i.putExtra("isFlag", false);
-		i.putExtra("operatFlag", LOGIN_FLAG);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
@@ -163,7 +169,6 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.putExtra("nonceStr", _nonceStr);
 		i.putExtra("timeStamp", _timeStamp);
 		i.putExtra("sign", _sign);
-		i.putExtra("operatFlag", PAY_FLAG);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
@@ -208,7 +213,6 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.putExtra("url", _url);
 		i.putExtra("image", _image);
 		i.putExtra("audio", _audio);
-		i.putExtra("operatFlag", SHARE_FLAG);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
