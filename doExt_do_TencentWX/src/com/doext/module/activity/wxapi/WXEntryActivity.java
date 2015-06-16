@@ -59,7 +59,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		String _nonceStr = getIntent().getStringExtra("nonceStr");
 		String _timeStamp = getIntent().getStringExtra("timeStamp");
 		String _sign = getIntent().getStringExtra("sign");
-		if (!checkIsNull("partnerId", _partnerId) && !checkIsNull("package", _package) && !checkIsNull("nonceStr", _nonceStr) && !checkIsNull("timeStamp", _timeStamp) && !checkIsNull("sign", _sign)) {
+		if (checkIsNull("partnerId", _partnerId) || checkIsNull("package", _package) || checkIsNull("nonceStr", _nonceStr) || checkIsNull("timeStamp", _timeStamp) || checkIsNull("sign", _sign)) {
 			return;
 		} else {
 			req.appId = appId;
