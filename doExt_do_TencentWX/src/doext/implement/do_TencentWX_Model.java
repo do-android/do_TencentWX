@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 
-import com.doext.module.activity.wxapi.WXEntryActivity;
 import com.tencent.mm.sdk.modelbase.BaseResp;
 import com.tencent.mm.sdk.modelmsg.SendAuth;
 import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
