@@ -91,7 +91,7 @@ public class DoTestActivity extends Activity {
 	 */
 	public void shareImgText(View view) {
 		Map<String, String>  _paras_loadString = new HashMap<String, String>();
-        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("appId", "wx7589880f174273b5");
         _paras_loadString.put("scene", edit_scene.getText().toString());
         _paras_loadString.put("type", "0");
         _paras_loadString.put("title", "测试微信分享");
@@ -112,7 +112,7 @@ public class DoTestActivity extends Activity {
 	 */
 	public void shareImg(View view) {
 		Map<String, String>  _paras_loadString = new HashMap<String, String>();
-        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("appId", "wx7589880f174273b5");
         _paras_loadString.put("scene", edit_scene.getText().toString());
         _paras_loadString.put("type", "1");
         _paras_loadString.put("url", "http://www.baidu.com");
@@ -130,7 +130,7 @@ public class DoTestActivity extends Activity {
 	 */
 	public void shareMusic(View view) {
 		Map<String, String>  _paras_loadString = new HashMap<String, String>();
-        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+        _paras_loadString.put("appId", "wx7589880f174273b5");
         _paras_loadString.put("scene", edit_scene.getText().toString());
         _paras_loadString.put("type", "2");
         _paras_loadString.put("title", "音乐标题");
@@ -150,7 +150,8 @@ public class DoTestActivity extends Activity {
 	 */
 	protected void doTestAsyncMethod() {
 		Map<String, String>  _paras_loadString = new HashMap<String, String>();
-        _paras_loadString.put("appId", "wxf087f8377cc0c395");
+		//d0b8c93dc7e3e0a814ed3512520b190c
+        _paras_loadString.put("appId", "wx7589880f174273b5");
         
         DoService.ansyncMethod(this.model, "login", _paras_loadString, new DoService.EventCallBack() {
 			@Override
