@@ -45,13 +45,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		super.onCreate(savedInstanceState);
 
 		String appId = getIntent().getStringExtra("appId");
-
-		if (appId == null && do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.LOGIN_FLAG)) {
-			finish();
-			Toast.makeText(this, "appId不能为空", Toast.LENGTH_SHORT).show();
-			return;
-		}
-
 		api = WXAPIFactory.createWXAPI(this, appId);
 		api.registerApp(appId);
 		api.handleIntent(getIntent(), this);
