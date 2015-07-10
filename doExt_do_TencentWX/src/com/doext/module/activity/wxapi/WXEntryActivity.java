@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URL;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -22,7 +23,6 @@ import com.tencent.mm.sdk.modelmsg.WXImageObject;
 import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.sdk.modelmsg.WXMusicObject;
 import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
-import com.tencent.mm.sdk.modelpay.PayReq;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
@@ -48,11 +48,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		api = WXAPIFactory.createWXAPI(this, appId);
 		api.registerApp(appId);
 		api.handleIntent(getIntent(), this);
-
+		
 		if (do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.LOGIN_FLAG)) {
 			login();
-		} else if (do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.PAY_FLAG)) {
-			pay(appId);
 		} else if (appId != null && do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.SHARE_FLAG)) {
 			share();
 		}
@@ -68,28 +66,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 			api.sendReq(req);
 			this.finish();
 		}
-	}
-
-	private void pay(String appId) {
-		PayReq req = new PayReq();
-
-		String _partnerId = getIntent().getStringExtra("partnerId");
-		String _package = getIntent().getStringExtra("package");
-		String _nonceStr = getIntent().getStringExtra("nonceStr");
-		String _timeStamp = getIntent().getStringExtra("timeStamp");
-		String _sign = getIntent().getStringExtra("sign");
-		if (checkIsNull("partnerId", _partnerId) || checkIsNull("package", _package) || checkIsNull("nonceStr", _nonceStr) || checkIsNull("timeStamp", _timeStamp) || checkIsNull("sign", _sign)) {
-			return;
-		} else {
-			req.appId = appId;
-			req.partnerId = _partnerId;
-			req.packageValue = _package;
-			req.nonceStr = _nonceStr;
-			req.timeStamp = _timeStamp;
-			req.sign = _sign;
-		}
-		api.sendReq(req);
-		finish();
 	}
 
 	private void share() {
@@ -131,13 +107,12 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		}
 
 	}
-
+	
 	@Override
 	public void onReq(BaseReq req) {}
 
 	@Override
 	public void onResp(BaseResp resp) {
-
 		try {
 			do_TencentWX_Model _model = (do_TencentWX_Model) DoServiceContainer.getSingletonModuleFactory().getSingletonModuleByID(null, do_TencentWX_App.getInstance().getModuleTypeID());
 			_model.callBack(resp);

@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 
+import com.tencent.mm.sdk.constants.ConstantsAPI;
 import com.tencent.mm.sdk.modelbase.BaseResp;
 import com.tencent.mm.sdk.modelmsg.SendAuth;
 import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
@@ -134,6 +135,14 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 			}else{
 				_invokeResult.setResultBoolean(false);
 			}
+		}else if(baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX){
+			if(baseResp.errCode == 0){
+				_invokeResult.setResultInteger(Integer.parseInt("0"));
+			}else if(baseResp.errCode == -2){
+				_invokeResult.setResultInteger(Integer.parseInt("-2"));
+			}else {
+				_invokeResult.setResultInteger(Integer.parseInt("-1"));
+			}
 		}
 		scriptEngine.callback(callbackFuncName, _invokeResult);
 	}
@@ -154,16 +163,18 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		this.callbackFuncName = _callbackFuncName;
 		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
 		String _partnerId = DoJsonHelper.getString(_dictParas,"partnerId", "");
-		String _package = DoJsonHelper.getString(_dictParas,"prepayId", "");
-		String _nonceStr = DoJsonHelper.getString(_dictParas,"package", "");
+		String _prepayId = DoJsonHelper.getString(_dictParas,"prepayId", "");
+		String _package = DoJsonHelper.getString(_dictParas,"package", "");
+		String _nonceStr = DoJsonHelper.getString(_dictParas,"nonceStr", "");
 		String _timeStamp = DoJsonHelper.getString(_dictParas,"timeStamp", "");
 		String _sign = DoJsonHelper.getString(_dictParas,"sign", "");
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
 		String _packageName = _activity.getPackageName();
-		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
+		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXPayEntryActivity");
 		Intent i = new Intent();
 		i.putExtra("appId", _appId);
 		i.putExtra("partnerId", _partnerId);
+		i.putExtra("prepayId", _prepayId);
 		i.putExtra("package", _package);
 		i.putExtra("nonceStr", _nonceStr);
 		i.putExtra("timeStamp", _timeStamp);

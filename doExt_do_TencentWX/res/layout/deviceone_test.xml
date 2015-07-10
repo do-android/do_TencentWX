@@ -54,6 +54,16 @@
             android:layout_height="wrap_content"
             android:onClick="shareMusic"
             android:text="音乐分享" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="pay"
+            android:text="微信支付" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="login"
+            android:text="微信登陆" />
 
     </LinearLayout>
 

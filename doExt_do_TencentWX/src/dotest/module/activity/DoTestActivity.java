@@ -144,7 +144,45 @@ public class DoTestActivity extends Activity {
 			}
 		});
 	}
+
+	/**
+	 * 测试微信支付
+	 */
+
+	public void pay(View view) {
+		Map<String, String>  _paras_loadString = new HashMap<String, String>();
+        _paras_loadString.put("appId", "wx7589880f174273b5");
+        _paras_loadString.put("partnerId", "1245331002");
+        _paras_loadString.put("prepayId", "wx20150710155449250a4bb56e0178070010");
+        _paras_loadString.put("package", "Sign=WXPay");
+        _paras_loadString.put("nonceStr", "05f971b5ec196b8c65b75d2ef8267331");
+        _paras_loadString.put("timeStamp", "1436515188");
+        _paras_loadString.put("sign", "45A33029AC5FA41A33C6BAA98178B03F");
+        DoService.ansyncMethod(this.model, "pay", _paras_loadString, new DoService.EventCallBack() {
+			@Override
+			public void eventCallBack(String _data) {//回调函数
+				Toast.makeText(DoTestActivity.this, "异步方法回调：" + _data, Toast.LENGTH_SHORT).show();
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+			}
+		});
+	}
 	
+	/**
+	 * 测试微信登陆
+	 */
+
+	public void login(View view) {
+		Map<String, String>  _paras_loadString = new HashMap<String, String>();
+        _paras_loadString.put("appId", "wx7589880f174273b5");
+        
+        DoService.ansyncMethod(this.model, "login", _paras_loadString, new DoService.EventCallBack() {
+			@Override
+			public void eventCallBack(String _data) {//回调函数
+				Toast.makeText(DoTestActivity.this, "异步方法回调：" + _data, Toast.LENGTH_SHORT).show();
+				DoServiceContainer.getLogEngine().writeDebug("异步方法回调：" + _data);
+			}
+		});
+	}
 	/**
 	 * 测试异步方法
 	 */
