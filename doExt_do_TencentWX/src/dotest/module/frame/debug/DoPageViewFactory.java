@@ -26,7 +26,7 @@ public class DoPageViewFactory implements DoIPageViewFactory {
 	}
 
 	@Override
-	public void closePage(String arg0, String arg1) {
+	public void closePage(String _animationType, String _data, int _continue) {
 		// TODO Auto-generated method stub
 		
 	}
