@@ -116,7 +116,7 @@ public class DoTestActivity extends Activity {
         _paras_loadString.put("scene", edit_scene.getText().toString());
         _paras_loadString.put("type", "1");
         _paras_loadString.put("url", "http://www.baidu.com");
-        _paras_loadString.put("image", "/storage/emulated/0/test.png");
+        _paras_loadString.put("image", "http://img.qzone.la/uploads/allimg/110629/co110629135Z1-6.jpg");
         DoService.ansyncMethod(this.model, "share", _paras_loadString, new DoService.EventCallBack() {
 			@Override
 			public void eventCallBack(String _data) {//回调函数

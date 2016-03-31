@@ -31,6 +31,7 @@ import core.DoServiceContainer;
 import doext.app.do_TencentWX_App;
 import doext.implement.do_TencentWX_Model;
 
+@SuppressLint("HandlerLeak")
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	private IWXAPI api;
 	// 图文分享标识
@@ -48,7 +49,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		api = WXAPIFactory.createWXAPI(this, appId);
 		api.registerApp(appId);
 		api.handleIntent(getIntent(), this);
-		
+
 		if (do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.LOGIN_FLAG)) {
 			login();
 		} else if (appId != null && do_TencentWX_Model.OPERAT_FLAG.equals(do_TencentWX_Model.SHARE_FLAG)) {
@@ -95,21 +96,20 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 			}
 			break;
 		case SHARE_MUSIC:
-
 			sendMusic(_audio, _scene, _title, _content);
 			break;
 
 		default:
-
 			Toast.makeText(this, "微信分享类型不合法，错误类型号：" + _type, Toast.LENGTH_SHORT).show();
 			finish();
 			return;
 		}
 
 	}
-	
+
 	@Override
-	public void onReq(BaseReq req) {}
+	public void onReq(BaseReq req) {
+	}
 
 	@Override
 	public void onResp(BaseResp resp) {
@@ -135,19 +135,41 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 	}
 
-	public void sendImg(String image, int scene) {
-		File file = new File(image);
-		if (!file.exists()) {
-			Toast.makeText(this, image + "不存在", Toast.LENGTH_SHORT).show();
-			return;
+	public void sendImg(final String image, final int scene) {
+		final Handler handler = new Handler() {
+			public void handleMessage(android.os.Message msg) {
+				Bitmap bmp = (Bitmap) msg.obj;
+				sendImg(image, bmp, scene);
+			}
+		};
+		// 如果是网络图片
+		if (image.contains("http://") || image.contains("https://")) {
+			// 开启子线程加载图片
+			new Thread() {
+				public void run() {
+					try {
+						Bitmap thumb = BitmapFactory.decodeStream(new URL(image).openStream());
+						handler.handleMessage(handler.obtainMessage(1, thumb));
+					} catch (Exception e) {
+						DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model sendImgText \n\t", e);
+					}
+				};
+			}.start();
+			// 如果是本地图片
+		} else {
+			Bitmap bmp = getLocalImage(image);
+			sendImg(image, bmp, scene);
 		}
+	}
+
+	private void sendImg(String image, Bitmap thumbBmp, int scene) {
 		WXImageObject imgObj = new WXImageObject();
 		imgObj.setImagePath(image);
 
+		//设置图片
 		WXMediaMessage msg = new WXMediaMessage();
 		msg.mediaObject = imgObj;
-		Bitmap thumbBmp = getLocalImage(image);
-
+		//设置缩略图
 		msg.thumbData = getBitmapBytes(thumbBmp, false);
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
 		req.transaction = buildTransaction("img");
@@ -174,19 +196,15 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		finish();
 	}
 
-	@SuppressLint("HandlerLeak")
 	public void sendImgText(final String url, final String title, final String text, final String image, final int scene) {
-
-		final String imgUrl = image;
 		final Handler handler = new Handler() {
-
 			public void handleMessage(android.os.Message msg) {
 				Bitmap bmp = (Bitmap) msg.obj;
 				toTextImg(url, title, text, bmp, scene);
 			};
 		};
 		// 如果是网络图片
-		if (imgUrl.contains("http://") || imgUrl.contains("https://")) {
+		if (image.contains("http://") || image.contains("https://")) {
 			// 开启子线程加载图片
 			new Thread() {
 				public void run() {
@@ -200,7 +218,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 			}.start();
 			// 如果是本地图片
 		} else {
-			Bitmap bmp = getLocalImage(imgUrl);
+			Bitmap bmp = getLocalImage(image);
 			toTextImg(url, title, text, bmp, scene);
 		}
 	}
