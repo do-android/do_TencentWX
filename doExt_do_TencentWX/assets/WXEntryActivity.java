@@ -96,7 +96,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 			}
 			break;
 		case SHARE_MUSIC:
-			sendMusic(_audio, _scene, _title, _content);
+			sendMusic(_audio, _scene, _title, _content, _image);
 			break;
 
 		default:
@@ -149,7 +149,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 				public void run() {
 					try {
 						Bitmap thumb = BitmapFactory.decodeStream(new URL(image).openStream());
-						handler.handleMessage(handler.obtainMessage(1, thumb));
+						handler.handleMessage(handler.obtainMessage(0, thumb));
 					} catch (Exception e) {
 						DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model sendImgText \n\t", e);
 					}
@@ -163,33 +163,17 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	}
 
 	private void sendImg(String image, Bitmap thumbBmp, int scene) {
-		WXImageObject imgObj = new WXImageObject();
-		imgObj.setImagePath(image);
+		WXImageObject imgObj = new WXImageObject(thumbBmp);
 
 		//设置图片
 		WXMediaMessage msg = new WXMediaMessage();
 		msg.mediaObject = imgObj;
 		//设置缩略图
-		msg.thumbData = getBitmapBytes(thumbBmp, false);
+		if (thumbBmp != null) {
+			msg.thumbData = getBitmapBytes(thumbBmp, false);
+		}
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
 		req.transaction = buildTransaction("img");
-		req.message = msg;
-		req.scene = scene;
-		api.sendReq(req);
-		finish();
-	}
-
-	public void sendMusic(String audio, int scene, String title, String text) {
-		WXMusicObject music = new WXMusicObject();
-		music.musicUrl = audio;
-
-		WXMediaMessage msg = new WXMediaMessage();
-		msg.mediaObject = music;
-		msg.title = title;
-		msg.description = text;
-
-		SendMessageToWX.Req req = new SendMessageToWX.Req();
-		req.transaction = buildTransaction("music");
 		req.message = msg;
 		req.scene = scene;
 		api.sendReq(req);
@@ -210,7 +194,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 				public void run() {
 					try {
 						Bitmap thumb = BitmapFactory.decodeStream(new URL(image).openStream());
-						handler.handleMessage(handler.obtainMessage(1, thumb));
+						handler.handleMessage(handler.obtainMessage(0, thumb));
 					} catch (Exception e) {
 						DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model sendImgText \n\t", e);
 					}
@@ -238,6 +222,55 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		localReq.scene = scene;
 		api.sendReq(localReq);
 		finish();
+	}
+
+	public void sendMusic(final String audio, final int scene, final String title, final String text, final String image) {
+		final Handler handler = new Handler() {
+			public void handleMessage(android.os.Message msgs) {
+				Bitmap bmp = (Bitmap) msgs.obj;
+				toMusicImg(audio, title, text, bmp, scene);
+			};
+		};
+
+		// 如果是网络图片
+		if (image.contains("http://") || image.contains("https://")) {
+			// 开启子线程加载图片
+			new Thread() {
+				public void run() {
+					try {
+						Bitmap thumb = BitmapFactory.decodeStream(new URL(image).openStream());
+						handler.handleMessage(handler.obtainMessage(0, thumb));
+					} catch (Exception e) {
+						DoServiceContainer.getLogEngine().writeError("do_TencentWX_Model sendMusic \n\t", e);
+					}
+				};
+			}.start();
+
+		} else {
+			Bitmap bmp = getLocalImage(image);
+			toMusicImg(audio, title, text, bmp, scene);
+		}
+	}
+
+	private void toMusicImg(String audio, String title, String text, Bitmap bmp, int scene) {
+
+		WXMusicObject music = new WXMusicObject();
+		music.musicUrl = audio;
+
+		WXMediaMessage msg = new WXMediaMessage();
+		msg.mediaObject = music;
+		msg.title = title;
+		msg.description = text;
+		if (bmp != null) {
+			msg.thumbData = getBitmapBytes(bmp, false);
+		}
+		SendMessageToWX.Req req = new SendMessageToWX.Req();
+		req.transaction = buildTransaction("music");
+		req.message = msg;
+		req.scene = scene;
+		api.sendReq(req);
+		finish();
+
 	}
 
 	private String buildTransaction(final String type) {
