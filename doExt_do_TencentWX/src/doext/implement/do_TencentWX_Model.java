@@ -10,6 +10,8 @@ import com.tencent.mm.sdk.constants.ConstantsAPI;
 import com.tencent.mm.sdk.modelbase.BaseResp;
 import com.tencent.mm.sdk.modelmsg.SendAuth;
 import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import core.DoServiceContainer;
 import core.helper.DoIOHelper;
@@ -27,14 +29,12 @@ import doext.define.do_TencentWX_IMethod;
  * DoInvokeResult(this.getUniqueKey());
  */
 public class do_TencentWX_Model extends DoSingletonModule implements do_TencentWX_IMethod {
-	
+
 	public static final String LOGIN_FLAG = "login";
 	public static final String PAY_FLAG = "pay";
 	public static final String SHARE_FLAG = "share";
-	
-	public static String OPERAT_FLAG  = LOGIN_FLAG;
-	
-	
+	private IWXAPI msgApi;
+	public static String OPERAT_FLAG = LOGIN_FLAG;
 	public do_TencentWX_Model() throws Exception {
 		super();
 	}
@@ -50,6 +50,10 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	@Override
 	public boolean invokeSyncMethod(String _methodName, JSONObject _dictParas, DoIScriptEngine _scriptEngine, DoInvokeResult _invokeResult) throws Exception {
 		// ...do something
+		if ("isWXAppInstalled".equals(_methodName)) {
+			isWXAppInstalled(_dictParas, _scriptEngine, _invokeResult);
+			return true;
+		}
 		return super.invokeSyncMethod(_methodName, _dictParas, _scriptEngine, _invokeResult);
 	}
 
@@ -69,17 +73,17 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	@Override
 	public boolean invokeAsyncMethod(String _methodName, JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		if ("login".equals(_methodName)) {
-			OPERAT_FLAG  =  LOGIN_FLAG;
+			OPERAT_FLAG = LOGIN_FLAG;
 			this.login(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
 		if ("pay".equals(_methodName)) {
-			OPERAT_FLAG  =  PAY_FLAG;
+			OPERAT_FLAG = PAY_FLAG;
 			this.pay(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
 		if ("share".equals(_methodName)) {
-			OPERAT_FLAG  =  SHARE_FLAG;
+			OPERAT_FLAG = SHARE_FLAG;
 			this.share(_dictParas, _scriptEngine, _callbackFuncName);
 			return true;
 		}
@@ -99,7 +103,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	public void login(JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		this.scriptEngine = _scriptEngine;
 		this.callbackFuncName = _callbackFuncName;
-		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
+		String _appId = DoJsonHelper.getString(_dictParas, "appId", "");
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
 		String _packageName = _activity.getPackageName();
 		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
@@ -114,7 +118,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	private String callbackFuncName;
 
 	public void callBack(BaseResp baseResp) throws Exception {
-		
+
 		DoInvokeResult _invokeResult = new DoInvokeResult(getUniqueKey());
 		if (baseResp instanceof SendAuth.Resp) {
 			SendAuth.Resp resp = (SendAuth.Resp) baseResp;
@@ -125,22 +129,22 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 			_node.put("lang", resp.lang);
 			_node.put("country", resp.country);
 			_invokeResult.setResultNode(_node);
-			
-		}else if(baseResp instanceof SendMessageToWX.Resp){
+
+		} else if (baseResp instanceof SendMessageToWX.Resp) {
 			SendMessageToWX.Resp resp = (SendMessageToWX.Resp) baseResp;
 			//分享成功
-			if(resp.errCode == BaseResp.ErrCode.ERR_OK){
+			if (resp.errCode == BaseResp.ErrCode.ERR_OK) {
 				_invokeResult.setResultBoolean(true);
-			//分享失败
-			}else{
+				//分享失败
+			} else {
 				_invokeResult.setResultBoolean(false);
 			}
-		}else if(baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX){
-			if(baseResp.errCode == 0){
+		} else if (baseResp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
+			if (baseResp.errCode == 0) {
 				_invokeResult.setResultInteger(Integer.parseInt("0"));
-			}else if(baseResp.errCode == -2){
+			} else if (baseResp.errCode == -2) {
 				_invokeResult.setResultInteger(Integer.parseInt("-2"));
-			}else {
+			} else {
 				_invokeResult.setResultInteger(Integer.parseInt("-1"));
 			}
 		}
@@ -157,17 +161,16 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 * @_callbackFuncName 回调函数名
 	 */
 	@Override
-	public void pay(JSONObject _dictParas, DoIScriptEngine _scriptEngine,
-			String _callbackFuncName) throws Exception {
+	public void pay(JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 		this.scriptEngine = _scriptEngine;
 		this.callbackFuncName = _callbackFuncName;
-		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
-		String _partnerId = DoJsonHelper.getString(_dictParas,"partnerId", "");
-		String _prepayId = DoJsonHelper.getString(_dictParas,"prepayId", "");
-		String _package = DoJsonHelper.getString(_dictParas,"package", "");
-		String _nonceStr = DoJsonHelper.getString(_dictParas,"nonceStr", "");
-		String _timeStamp = DoJsonHelper.getString(_dictParas,"timeStamp", "");
-		String _sign = DoJsonHelper.getString(_dictParas,"sign", "");
+		String _appId = DoJsonHelper.getString(_dictParas, "appId", "");
+		String _partnerId = DoJsonHelper.getString(_dictParas, "partnerId", "");
+		String _prepayId = DoJsonHelper.getString(_dictParas, "prepayId", "");
+		String _package = DoJsonHelper.getString(_dictParas, "package", "");
+		String _nonceStr = DoJsonHelper.getString(_dictParas, "nonceStr", "");
+		String _timeStamp = DoJsonHelper.getString(_dictParas, "timeStamp", "");
+		String _sign = DoJsonHelper.getString(_dictParas, "sign", "");
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
 		String _packageName = _activity.getPackageName();
 		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXPayEntryActivity");
@@ -182,7 +185,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
-	
+
 	/**
 	 * 使用微信分享；
 	 * 
@@ -193,24 +196,23 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	 * @_callbackFuncName 回调函数名
 	 */
 	@Override
-	public void share(JSONObject _dictParas, DoIScriptEngine _scriptEngine,
-			String _callbackFuncName) throws Exception {
+	public void share(JSONObject _dictParas, DoIScriptEngine _scriptEngine, String _callbackFuncName) throws Exception {
 
 		this.scriptEngine = _scriptEngine;
 		this.callbackFuncName = _callbackFuncName;
-		String _appId = DoJsonHelper.getString(_dictParas,"appId", "");
+		String _appId = DoJsonHelper.getString(_dictParas, "appId", "");
 		int _scene = DoJsonHelper.getInt(_dictParas, "scene", 0);
-		int _type = DoJsonHelper.getInt(_dictParas,"type", 0);
-		String _title = DoJsonHelper.getString(_dictParas,"title", "");
-		String _content = DoJsonHelper.getString(_dictParas,"content", "");
-		String _url = DoJsonHelper.getString(_dictParas,"url", "");
-		String _image = DoJsonHelper.getString(_dictParas,"image", "");
-		String _audio = DoJsonHelper.getString(_dictParas,"audio", "");
-		
-		if (!_image.equals("")&&null == DoIOHelper.getHttpUrlPath(_image)) {
+		int _type = DoJsonHelper.getInt(_dictParas, "type", 0);
+		String _title = DoJsonHelper.getString(_dictParas, "title", "");
+		String _content = DoJsonHelper.getString(_dictParas, "content", "");
+		String _url = DoJsonHelper.getString(_dictParas, "url", "");
+		String _image = DoJsonHelper.getString(_dictParas, "image", "");
+		String _audio = DoJsonHelper.getString(_dictParas, "audio", "");
+
+		if (!_image.equals("") && null == DoIOHelper.getHttpUrlPath(_image)) {
 			_image = DoIOHelper.getLocalFileFullPath(_scriptEngine.getCurrentApp(), _image);
 		}
-		
+
 		Activity _activity = DoServiceContainer.getPageViewFactory().getAppContext();
 		String _packageName = _activity.getPackageName();
 		ComponentName _componetName = new ComponentName(_packageName, _packageName + ".wxapi.WXEntryActivity");
@@ -226,5 +228,16 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
-	
+
+	@Override
+	public void isWXAppInstalled(JSONObject _dictParas, DoIScriptEngine _scriptEngine, DoInvokeResult _invokeResult) throws Exception {
+		if(msgApi == null){
+			msgApi = WXAPIFactory.createWXAPI(DoServiceContainer.getPageViewFactory().getAppContext(), null);
+		}
+		_invokeResult.setResultBoolean(isWXAppInstalledAndSupported());
+	}
+
+	private boolean isWXAppInstalledAndSupported( ) {
+		return msgApi.isWXAppInstalled() && msgApi.isWXAppSupportAPI();
+	}
 }
