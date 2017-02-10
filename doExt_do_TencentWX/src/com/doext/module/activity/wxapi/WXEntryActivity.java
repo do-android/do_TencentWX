@@ -84,6 +84,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		String _image = getIntent().getStringExtra("image");
 		// 分享音乐地址
 		String _audio = getIntent().getStringExtra("audio");
+		// 分享缩略图地址
+		String _trumb = getIntent().getStringExtra("trumb");
 		switch (_type) {
 		case SHARE_IMG_TEXT:
 			if (!checkIsNull("图文分享类型，文本内容", _content)) {
@@ -92,7 +94,12 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 			break;
 		case SHARE_IMG:
 			if (!checkIsNull("纯图分享类型，图片路径", _content)) {
-				sendImg(_image, _scene);
+				if(_trumb.equals("")){//为空时则自动取缩放后的image参数图片
+					sendImg(_image, _scene);
+ 
+				}else{
+					sendImg(_trumb, _scene);	
+				}
 			}
 			break;
 		case SHARE_MUSIC:
@@ -179,7 +186,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		api.sendReq(req);
 		finish();
 	}
-
+ 
 	public void sendImgText(final String url, final String title, final String text, final String image, final int scene) {
 		final Handler handler = new Handler() {
 			public void handleMessage(android.os.Message msg) {

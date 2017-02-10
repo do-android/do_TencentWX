@@ -35,6 +35,7 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 	public static final String SHARE_FLAG = "share";
 	private IWXAPI msgApi;
 	public static String OPERAT_FLAG = LOGIN_FLAG;
+
 	public do_TencentWX_Model() throws Exception {
 		super();
 	}
@@ -132,10 +133,10 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 
 		} else if (baseResp instanceof SendMessageToWX.Resp) {
 			SendMessageToWX.Resp resp = (SendMessageToWX.Resp) baseResp;
-			//分享成功
+			// 分享成功
 			if (resp.errCode == BaseResp.ErrCode.ERR_OK) {
 				_invokeResult.setResultBoolean(true);
-				//分享失败
+				// 分享失败
 			} else {
 				_invokeResult.setResultBoolean(false);
 			}
@@ -208,7 +209,13 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		String _url = DoJsonHelper.getString(_dictParas, "url", "");
 		String _image = DoJsonHelper.getString(_dictParas, "image", "");
 		String _audio = DoJsonHelper.getString(_dictParas, "audio", "");
-
+		// 缩略图地址
+		String _trumb = DoJsonHelper.getString(_dictParas, "trumb", "");
+	 
+		if (!_trumb.equals("") && null == DoIOHelper.getHttpUrlPath(_trumb)) {
+			_trumb = DoIOHelper.getLocalFileFullPath(_scriptEngine.getCurrentApp(), _trumb);
+		}
+		
 		if (!_image.equals("") && null == DoIOHelper.getHttpUrlPath(_image)) {
 			_image = DoIOHelper.getLocalFileFullPath(_scriptEngine.getCurrentApp(), _image);
 		}
@@ -225,19 +232,20 @@ public class do_TencentWX_Model extends DoSingletonModule implements do_TencentW
 		i.putExtra("url", _url);
 		i.putExtra("image", _image);
 		i.putExtra("audio", _audio);
+		i.putExtra("trumb", _trumb);
 		i.setComponent(_componetName);
 		_activity.startActivity(i);
 	}
 
 	@Override
 	public void isWXAppInstalled(JSONObject _dictParas, DoIScriptEngine _scriptEngine, DoInvokeResult _invokeResult) throws Exception {
-		if(msgApi == null){
+		if (msgApi == null) {
 			msgApi = WXAPIFactory.createWXAPI(DoServiceContainer.getPageViewFactory().getAppContext(), null);
 		}
 		_invokeResult.setResultBoolean(isWXAppInstalledAndSupported());
 	}
 
-	private boolean isWXAppInstalledAndSupported( ) {
+	private boolean isWXAppInstalledAndSupported() {
 		return msgApi.isWXAppInstalled() && msgApi.isWXAppSupportAPI();
 	}
 }
